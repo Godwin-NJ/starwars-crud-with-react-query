@@ -13,26 +13,51 @@ const fetchPlanets = async (page) => {
 
 const Planents = () => {
   const [page, setPage] = useState(1);
-  const { data, status } = useQuery(["planets", page], () =>
-    fetchPlanets(page)
+  const { data, status, isPreviousData } = useQuery(
+    ["planets", page],
+    () => fetchPlanets(page),
+    { keepPreviousData: true }
   );
-  console.log(data);
+  // console.log(data);
+  // console.log("changes to btn", page);
   return (
     <div>
       <h2>Planets</h2>
       {/* pagination  */}
-      <button onClick={() => setPage(1)}>Page 1</button>
+      {/* <button onClick={() => setPage(1)}>Page 1</button>
       <button onClick={() => setPage(2)}>Page 2</button>
-      <button onClick={() => setPage(3)}>Page 3</button>
-
+      <button onClick={() => setPage(3)}>Page 3</button> */}
       {status === "pending" && <div>Loading Data</div>}
       {status === "error" && <div>Error fetching data</div>}
       {status === "success" && (
-        <div>
-          {data.results.map((planet) => {
-            return <SinglePlanet key={planet.name} planet={planet} />;
-          })}
-        </div>
+        <>
+          <button
+            onClick={() => setPage((old) => Math.max(old - 1, 1))}
+            disabled={page === 1}
+          >
+            Previous Page
+          </button>
+          <span>{page}</span>
+          <button
+            onClick={() => {
+              // console.log("!change", !isPreviousData, !data.hasMore);
+              if (!isPreviousData || !data.hasMore) {
+                setPage((old) => old + 1);
+                return;
+              }
+            }}
+            //below disable function is showing error
+            // disabled={isPreviousData || !data?.hasMore}
+            disabled={page === 6}
+          >
+            Next Page
+          </button>
+          <div>
+            {data.results.map((planet) => {
+              return <SinglePlanet key={planet.name} planet={planet} />;
+            })}
+          </div>
+        </>
       )}
     </div>
   );
